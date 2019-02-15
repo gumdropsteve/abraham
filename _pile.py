@@ -1,68 +1,20 @@
-import time
-ph4s_fb = 'https://facebook.com/pleasantonhome'
-pleasantonhomesforsale_hash = '#RealEstate #Residential #ResidentialRealEstate #PleasantonHomesForSale #Pleasanton #California #CaliforniaRealEstate #TriValley #SFBayArea #BayAreaRealEstate #PleasantonCA #HomesForSale #NewListing #SanFranciscoBayArea #HomeForSale #OpenHouse #OpenHouses'
+# tags
+tol = 'ul.mdl-cell.mdl-textfield--align-right li:nth-of-type(1)'  # type of listing
+lmilsst = 'ul.mdl-cell.mdl-textfield--align-right li:nth-of-type(2)'  # mls number of listing
+stts = 'ul.mdl-cell.mdl-textfield--align-right li:nth-of-type(3)'  # status of listing
+addresses = 'div.mdl-card__supporting-text h2.mdl-card__title-text'  # addresses from base scrape page
+prc = 'li.price'  # price from specific link (oddly straight)
+bdz = 'ul.family li:nth-of-type(2)'  # beds from specific link (specific listing link)
+bths = 'ul.family li:nth-of-type(3)'  # baths from specific link
+stdsze = 'ul.family li:nth-of-type(4)'  # sqft from specific link
 
+# links
+bsearch_url = 'https://winstonrobson.bhhsdrysdale.com/homes/for-sale/search-'  # base os search url
+base_url = 'https://winstonrobson.bhhsdrysdale.com'  # base url
+new_pleasanton_short_link = 'https://goo.gl/WJmmut'  # https://winstonrobson.bhhsdrysdale.com/homes/for-sale/status-active/city-;Pleasanton/dsort-n
 
-def formated_h4s(location, data):
-    header = 'New/Listing/in', '/', location, '!'
-    # footer = 'More info: '
-    # footer = '\n \n More info:'
-    x = '\n- '.join(data)  # pleasanton(pleasanton_log)
-    y = '- ', x
-    z = ''.join(y)
-    a = '\n', z
-    b = ''.join(a)
-    c = ''.join(header).replace(' ', '').replace('/', ' '), b
-    d = '\n'.join(c)
-    e = str(d)  # + ' ' + '\n' + '-'  # + 'k'
-    # e = d, '', footer
-    # f = '\n'.join(e)
-    return d  # + footer
-    # return e  
-
-
-def youtube_money(q, hashtags):
-    from new_listing_scrape import comps
-    from new_listing_log import pleasanton_log  # optimized for minimum to 'check' (general/generic approach)
-
-    p = comps(pleasanton_log)
-    if p:
-        if q == 'c':  # c : check
-            if len(p) == 1:
-                print('new listing:', p)
-                j = input('want to post? (yes/no) ')  # allows check to post
-                if j == 'yes':
-                    pleasantonhome(pleasantonhomesforsale_hash)  # rerun style 
-                elif j == 'no':
-                    return('ok, maybe later, see you next time')
-                else:
-                    raise Exception('invalid argument')
-            elif len(p) > 1:
-                print('\n', 'multiple new listings:', '\n', p)
-                return ' if you would like to post one of the listings, please temporarily add the others to the refrenced log \n'
-            else:  # f (unseen outside of user/syntax error)
-                raise Exception('f', len(p))
-        elif q == 'y':  # y : yes, post
-            pleasantonhome(pleasantonhomesforsale_hash)
-        else:
-            raise Exception('invalid argument')
-    else:
-        raise Exception('f')
-
-
-def pleasantonhome(hashtags):
-    from new_listing_scrape import pleasanton, gen_link_of_interest
-    from the_facebook_part import get_on_facebook, post_to_page, shorten_, moves, post_now, get_on_google
-    from new_listing_log import pleasanton_log
-    get_on_facebook()
-    get_on_google()
-    shorten_(gen_link_of_interest(pleasanton_log))
-    lower_tags = '\n \n' + hashtags
-    ph_foot = '\n \n More info:'
-    post_to_page(page=ph4s_fb, location='pleasanton, california', feeling='look', feeling2='home re', status=formated_h4s('Pleasanton', pleasanton()), hashtags=lower_tags, paste_link='yes', footer=ph_foot)
-    # time.sleep(1000)
-    # post_now()
-
+# multiuse
+hdotp = 'html.parser' 
 
 # google 
 google_sign_in_page = 'https://accounts.google.com/signin'
@@ -94,7 +46,10 @@ feeling_box = '/html/body/div[1]/div[3]/div[1]/div/div/div[2]/div[2]/div[2]/div/
 feeling_box2 = '/html/body/div[1]/div[3]/div[1]/div/div/div[2]/div[2]/div[2]/div/div[2]/div[2]/div/div[1]/div/div[2]/' \
                'div/div[1]/div[1]/div/div[2]/div[1]/div/div/div/div[2]/div/div[2]/div[1]/div/table/tbody/tr/td[2]/spa' \
                'n/span/label/input'
+ph4s_fb = 'https://facebook.com/pleasantonhome'
 
+# hashtags 
+pleasantonhomesforsale_hash = '#RealEstate #Residential #ResidentialRealEstate #PleasantonHomesForSale #Pleasanton #California #CaliforniaRealEstate #TriValley #SFBayArea #BayAreaRealEstate #PleasantonCA #HomesForSale #NewListing #SanFranciscoBayArea #HomeForSale #OpenHouse #OpenHouses'
 
 gid = google_id
 toast = google_word

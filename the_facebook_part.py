@@ -105,7 +105,7 @@ def add_hash(tags):
     reach_for_keyboard(tags)  # hashtags
 
 
-def post_to_page(page, location, feeling, feeling2, status, hashtags, paste_link, footer):  
+def post_to_page(page, location, feeling, feeling2, status, hashtags, paste_link):  
     # coming soon: post_type, schedule, blame
     # need options to auto-set
     # need less inputs, preset definitions?
@@ -113,7 +113,6 @@ def post_to_page(page, location, feeling, feeling2, status, hashtags, paste_link
     moves(status_box, 'css', 'click')  # open status box
     reach_for_keyboard(status)  # send status (not intractable with send_keys)
     if paste_link == 'yes':
-        reach_for_keyboard(footer)
         paste_it()  # link to listing
     else:
         pass  
