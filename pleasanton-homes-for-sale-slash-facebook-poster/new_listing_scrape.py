@@ -3,25 +3,7 @@ from requests import get
 from bs4 import BeautifulSoup
 from contextlib import closing
 from requests.exceptions import RequestException
-
-# tags
-tol = 'ul.mdl-cell.mdl-textfield--align-right li:nth-of-type(1)'  # type of listing
-lmilsst = 'ul.mdl-cell.mdl-textfield--align-right li:nth-of-type(2)'  # mls number of listing
-stts = 'ul.mdl-cell.mdl-textfield--align-right li:nth-of-type(3)'  # status of listing
-addresses = 'div.mdl-card__supporting-text h2.mdl-card__title-text'  # addresses from base scrape page
-prc = 'li.price'  # price from specific link (oddly straight)
-bdz = 'ul.family li:nth-of-type(2)'  # beds from specific link (specific listing link)
-bths = 'ul.family li:nth-of-type(3)'  # baths from specific link
-stdsze = 'ul.family li:nth-of-type(4)'  # sqft from specific link
-
-# links
-bsearch_url = 'https://winstonrobson.bhhsdrysdale.com/homes/for-sale/search-'  # base os search url
-base_url = 'https://winstonrobson.bhhsdrysdale.com'  # base url
-new_pleasanton_short_link = 'https://goo.gl/WJmmut'  # https://winstonrobson.bhhsdrysdale.com/homes/for-sale/status-active/city-;Pleasanton/dsort-n
-bimage_url = 'https://winstonrobson.bhhsdrysdale.com/img/mls/MLSPhotos/EBRRES/'  # base image url
-
-# multiuse
-hdotp = 'html.parser' 
+from _pile import tol, lmilsst, stts, addresses, prc, bdz, bths, stdsze, bsearch_url, base_url, new_pleasanton_short_link, hdotp
 
 
 def l(e):  # prints errors  # need to make this post to permanent log
@@ -161,66 +143,38 @@ def gen_link_of_interest(psl):  # builds link for listing of interest
     # * aka putting print() instead of return here
 
 
-def listing_images_links(numbers, psl):  # generates links to desired images for listing (based on requested image numbers)
-    bd = rere(on_site_search_links(psl))
-    mls_num = ''.join((list(bd)).pop(1)).replace('MLS #', '')
-    image_links = []
-    for number in numbers:
-        image_links.append(bimage_url + mls_num + '_' + number + '.jpg')
-    return image_links
-
-    
-def save_listing_images():  # numbers, psl, response
-    from urllib.request import Request, urlopen
-    import urllib
-    import urllib.request
-
-    class AppURLopener(urllib.request.FancyURLopener):
-        version = "Mozilla/5.0"
-
-    opener = AppURLopener()
-    response = opener.open('http://httpbin.org/user-agent')
-    # req = Request('https://winstonrobson.bhhsdrysdale.com/img/mls/MLSPhotos/EBRRES/40851771_2.jpg', headers={'User-Agent': 'Mozilla/5.0'})
-    # webpage = urlopen(req).read()
-    # urllib.Request.urlretrieve("https://winstonrobson.bhhsdrysdale.com/img/mls/MLSPhotos/EBRRES/40851771_2.jpg", "web-images/local-filename.jpg")
-    
-    # import os
-    # img_lnks = listing_images_links(numbers, psl)
-    # print(img_lnks)
-    # if response is not None:
-        # for image in img_lnks:
-            # print(image)
-    #  class="image-container owl-lazy" 
-    # data-src="/img/mls/MLSPhotos/EBRRES/40846844_1.jpg?mw=641&mh=564">\r\n
-            # html = BeautifulSoup(response, hdotp)
-            # image_tags = []
-            # for image in html.select('owl-lazy'):
-            #     image_tags.append(image)  # image['src']
-            # print(image_tags)   
-    #     os.makedirs('web-images', exist_ok=True)
-    #     count = 0
-    #     for image in image_tags:
-    #         count += 1
-    #         q = basically_a_con(image, False)
-    #         file = os.open(str(('web-images/' + str(count) + image[image.rfind('.'):]), 'wb'))
-    #         file.write(q)
-    #         file.close()
-            # somed = set()
-            # for ul in html.select('img'):
-            #     for info in ul.text.split('\n'):
-            #         if len(info) > 0: 
-            #             somed.add(info.strip(prc))
-            # if len(somed) < 1:
-            #     return 'ERROR : NO DATA --get_price{}'.format(response)
-            # else:
-            #     return list(somed)
-        # raise Exception('Error retrieving IMG at {}'.format(response))  # Raise an exception if failed to get response
+def formated_h4s(location, data):
+    header = 'New/Listing/in', '/', location, '!'
+    footer = 'More info: '
+    x = '\n > '.join(data)  # pleasanton(pleasanton_log) '\n- ' 
+    y = ' > ', x  # '- '
+    z = ''.join(y)
+    a = z
+    b = ''.join(a)
+    c = ''.join(header).replace(' ', '').replace('/', ' ')
+    d = c, b
+    e = '\n'.join(d)
+    f = str(e)  # + ' ' + '\n' + '-'  # + 'k'
+    g = f, footer
+    h = '\n'.join(g)
+    edit_file = open("temp.txt", "w")
+    edit_file.write(h)
+    edit_file.close()
+    read_file = open("temp.txt", "r")
+    q = read_file.read()
+    read_file.close()
+    return q
 
 
-from new_listing_log import pleasanton_log
-# print(listing_images_links('123', pleasanton_log))
-# save_listing_images('12', pleasanton_log, basically_a_con('https://winstonrobson.bhhsdrysdale.com/ebr/40851771/'))
-save_listing_images()
+def clean_listing_data(psl, location):  # done here to hedge for readability of pull_listing_data
+    x = bbsp(gen_link_of_interest(psl))
+    # listing_images([1, 2])
+    price = ''.join((list(x)).pop())
+    beds = ''.join((list(x)).pop(0)).replace('Beds', ' Beds')
+    baths = ''.join((list(x)).pop(1)).replace('Baths', ' Baths')
+    sqft = ''.join((list(x)).pop(2)).replace('Sqft', ' SqFt')
+    big_4 = beds, baths, sqft, price  # ('4 Beds', '2 Baths', '1,965 SqFt', '$1,025,500')
+    return formated_h4s(location, big_4)
 
 
 def price(response):
@@ -289,23 +243,6 @@ def get_beds_baths_sqft_price(response):
 
 def bbsp(listing_url):
     return get_beds_baths_sqft_price(basically_a_con(listing_url))
-
-
-def clean_listing_data_and_get_pics(psl):  # done here to hedge for readability of pull_listing_data
-    x = bbsp(gen_link_of_interest(psl))
-    # listing_images([1, 2])
-    price = ''.join((list(x)).pop())
-    beds = ''.join((list(x)).pop(0)).replace('Beds', ' Beds')
-    baths = ''.join((list(x)).pop(1)).replace('Baths', ' Baths')
-    sqft = ''.join((list(x)).pop(2)).replace('Sqft', ' SqFt')
-    big_4 = beds, baths, sqft, price
-    return list(big_4)
-    # ('4 Beds', '2 Baths', '1,965 SqFt', '$1,025,500')
-
-
-def pleasanton(*idk_psl):  # test_005 : plugin : head scrape @ facebook updater, assist scrape @ Abraham
-    from new_listing_log import pleasanton_log
-    return clean_listing_data_and_get_pics(pleasanton_log, *idk_psl)  # NEED TO WORK ON DOUBLE PULL
 
 
 # WHERE WE STARTED (Jan 2019)
