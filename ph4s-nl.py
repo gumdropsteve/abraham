@@ -1,7 +1,6 @@
 from new_listing_scrape import bbsp, gen_link_of_interest, clean_listing_data
-from new_listing_log import pleasanton_log
 from _pile import pleasantonhomesforsale_hash
-
+pleasanton_log = 'pleasanton_log.csv'
 
 # # bbsp(gen_link_of_interest(pleasanton_log))
 # q = gen_link_of_interest(pleasanton_log)
@@ -55,7 +54,6 @@ def pleasantonhome(hashtags):
     # post_now()
 
 
-
 def run():    
     x = input('\n which would you like to run? \n a: print(look_and_see("c", "")) \n b: print(pleasanton(locaion="Pleasanton")) \n please input a or b \n')
     
@@ -67,11 +65,7 @@ def run():
         return 'argument invalid'
 
 
-m = run()
-print(m)
-
-
-
+print(run())
 
 
 
