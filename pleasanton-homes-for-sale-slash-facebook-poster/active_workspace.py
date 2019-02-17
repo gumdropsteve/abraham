@@ -52,14 +52,14 @@ def to_list_from(csv_log):
      
         return log 
 
-from new_listing_scrape import comps
-a = to_list_from('pleasanton_log.csv')
+# from new_listing_scrape import comps
+# a = to_list_from('pleasanton_log.csv')
 # print(len(a))
 # from new_listing_scrape import comps
-test_000 = comps(a)
-print(len(test_000))  
-for i in test_000:
-        add_listing_to_log(i, 'pleasanton_log.csv')
+# test_000 = comps(a)
+# print(len(test_000))  
+# for i in test_000:
+#         add_listing_to_log(i, 'pleasanton_log.csv')
 # h = len(a) + len(test_000)
 # print(f'expected: {h}')
 # add_listing_to_log(listing, 'pleasanton_log.csv')
