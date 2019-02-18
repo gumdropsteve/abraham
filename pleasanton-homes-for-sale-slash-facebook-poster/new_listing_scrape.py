@@ -3,7 +3,7 @@ from requests import get
 from bs4 import BeautifulSoup
 from contextlib import closing
 from requests.exceptions import RequestException
-from _pile import tol, lmilsst, stts, addresses, prc, bdz, bths, stdsze, bsearch_url, base_url, new_pleasanton_short_link, hdotp
+from _pile import tol, lmilsst, stts, addresses, prc, bdz, bths, stdsze, bsearch_url, base_url, hdotp
 
 
 def l(e):  # prints errors  # need to make this post to permanent log
@@ -47,10 +47,15 @@ def pull_the_new_pleasanton_listings(base_url):
     # use of 'raise' eliminates need for 'else' following 'if'  # seems to be in a replacing fashion
 
 
-def comps(existing_results):
+def comps(existing_results, city_short_link):
+    '''
+    input) previously seen listngs {existing_results}
+
+    1) 
+    '''
     results = []  # short term log for first encounter listings
     in_existing_results_count: int = 0  # specified int, not sure if any different from just x = 0, doubt it is
-    for listing in pull_the_new_pleasanton_listings(new_pleasanton_short_link):  # for data in datas
+    for listing in pull_the_new_pleasanton_listings(city_short_link):  # for data in datas
         if listing not in results:  # if not a double post
             if listing not in existing_results:  # if an unseen listing
                 results.append(listing)  # add listing to results
@@ -68,7 +73,7 @@ def comps(existing_results):
     elif len(results) == 1:  # expected most common actionable response once in routine
         return results  # broken down asap
     elif len(results) == 0:  # expected most common response once in routine
-        raise Exception(f'No New Listings in Pleasanton {new_pleasanton_short_link}')
+        raise Exception(f'No New Listings in Pleasanton {city_short_link}')
     else:
         raise Exception('F')
 

@@ -51,6 +51,10 @@ ph4s_fb = 'https://facebook.com/pleasantonhome'
 # hashtags 
 pleasantonhomesforsale_hash = '#RealEstate #Residential #ResidentialRealEstate #PleasantonHomesForSale #Pleasanton #California #CaliforniaRealEstate #TriValley #SFBayArea #BayAreaRealEstate #PleasantonCA #HomesForSale #NewListing #SanFranciscoBayArea #HomeForSale #OpenHouse #OpenHouses'
 
+# previously seen listing log(s)
+psl_pleasanton = 'pleasanton_log.csv'
+
+
 gid = google_id
 toast = google_word
 gpb = google_pass_box
