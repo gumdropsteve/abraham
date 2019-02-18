@@ -25,6 +25,10 @@ wheels/
 *.egg
 MANIFEST
 
+# geckodriver.log
+pleasanton-homes-for-sale-slash-facebook-poster/geckodriver.log
+/Users/winston/programming/self/abraham/pleasanton-homes-for-sale-slash-facebook-poster/geckodriver.log
+
 # _pile
 _pile.py
 pleasanton-homes-for-sale-slash-facebook-poster/_pile.py
