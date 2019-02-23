@@ -1,7 +1,7 @@
 import csv
 from bs4 import BeautifulSoup
 from new_listing_scrape import basically_a_con
-from _pile import addresses, hdotp, new_pleasanton_short_link
+from _pile import addresses, hdotp, npsl
 
 
 def pull_the_new_pleasanton_listings(base_url):
@@ -20,5 +20,5 @@ def pull_the_new_pleasanton_listings(base_url):
     # use of 'raise' eliminates need for 'else' following 'if'  # seems to be in a replacing fashion
 
 
-x = pull_the_new_pleasanton_listings(new_pleasanton_short_link)
-# print(len(x))
+ß = pull_the_new_pleasanton_listings(npsl)
+print(ß)

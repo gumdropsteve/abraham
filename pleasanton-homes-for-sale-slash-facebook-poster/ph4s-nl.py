@@ -1,5 +1,5 @@
 from new_listing_scrape import bbsp, gen_link_of_interest, clean_listing_data
-from _pile import pleasantonhomesforsale_hash, psl_pleasanton, new_pleasanton_short_link
+from _pile import pleasantonhomesforsale_hash, psl_pleasanton, npsl
 
 
 # # bbsp(gen_link_of_interest(psl_pleasanton))
@@ -15,7 +15,7 @@ def pleasanton(locaion='Pleasanton'):  # test_005 : plugin : head scrape @ faceb
 
 def look_and_see(q, hashtags):
     from new_listing_scrape import comps
-    p = comps(psl_pleasanton, new_pleasanton_short_link)
+    p = comps(psl_pleasanton, npsl)
     if p:
         if q == 'c':  # c : check
             if len(p) == 1:

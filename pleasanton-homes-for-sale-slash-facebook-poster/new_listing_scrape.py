@@ -3,7 +3,7 @@ from requests import get
 from bs4 import BeautifulSoup
 from contextlib import closing
 from requests.exceptions import RequestException
-from _pile import tol, lmilsst, stts, addresses, prc, bdz, bths, stdsze, bsearch_url, base_url, hdotp
+from _pile import tol, lmilsst, stts, addresses, prc, bdz, bths, stdsze, bsearch_url, base_url, hdotp, npsl
 
 
 def l(e):  # prints errors  # need to make this post to permanent log
@@ -49,9 +49,16 @@ def pull_the_new_pleasanton_listings(base_url):
 
 def comps(existing_results, city_short_link):
     '''
-    input) previously seen listngs {existing_results}
+    input) previously seen listngs {existing_results} for city of interest
+    input) link to city of interest listings sorted by newness {city_short_link}
 
-    1) 
+    1) pulls most recent new listings from city_short_link (usualy 12, range 10-13)
+        based on results of searching that city, gridview, sorting for newest results
+    2) compares the addresses of those listings to the previously seen listings (log) for that city
+
+    output) new listings in that city 
+        which are in the first page of new listings 
+        and are not existing_results (log) for that city 
     '''
     results = []  # short term log for first encounter listings
     in_existing_results_count: int = 0  # specified int, not sure if any different from just x = 0, doubt it is
@@ -78,50 +85,89 @@ def comps(existing_results, city_short_link):
         raise Exception('F')
 
 
-def on_site_search_links(s):  # links as if searched the exact address on site
+def on_site_search_link(seen_listings, city_short_link):  # links as if searched the exact address on site
+    '''
+    area for improvement) processing multiple new listings
+
+    input) previously seen listing log {seen_listings}
+    input) city_short_link for comps()
+    
+    1) runs comps() on seen_listings for city of interest (news = results)
+    2) takes the full address of any newly seen listing
+    3) converts it to url one would land on as result of searching that full address (on site)
+
+    output) url(s) of on site searches of the exact addresses seen in news
+    '''
     some_data = []  # for later processing of multiple new listings 
-    news = comps(s)
-    num_news = len(news)
-    if num_news == 1:
+
+    news = comps(seen_listings, city_short_link)
+    _ = len(news)
+
+    if _ == 1:
         for prop_of_interest in news:  # for unseen new listing  # meant to expand later for processing multiple new listings 
             some_data.append(bsearch_url + prop_of_interest.lower().replace(' ', ';'))  # adds address after conversion to resemble end of search url
         return some_data  # list of end pieces for on site search links
     else:
-        raise Exception(f'MULTIPLE NEW LISTINGS: \n {num_news} new listings. {news}')
+        raise Exception(f'MULTIPLE NEW LISTINGS: \n {_} new listings. {news}')
 
 
-def rere(url):  # all around utility of sorts
-    if len(url) == 1:
-        x = (str(url).replace('[', '').replace("'", "").replace(']', ''))
+def rere(os_search_links):  # all around utility of sorts
+    '''
+    area for improvement) processing multiple new listings 
+    area for improvement) multithreading 
+
+    # overview) reevaluates listings, 
+    #     acts as gate keeper determining if listing meets minimum criteria,
+    #     returns useful information if listing is green lit 
+    #     information is used to further pull listing details and pictures 
+
+    input) on_site_search_links {os_search_links}
+
+    1) pulls listing type 
+        - currently appears to be unused
+        - should have it double check that listing is 'Single Family'
+        - listing can be 'Single Family', 'Lot/Land', 'Commercial', 'Mobile Home', 
+            'Residential Income', 'Condo/Townhome', 'Farm/Ranch'
+    2) pulls listing status
+        - checks listing is still 'active'
+        - listing can be 'Active', 'Pending', 'Contingent', 
+            'Pending (Do Not Show)', 'Coming Soon', 'Sold'
+    3) pulls listing mls number 
+        - used to generate listing specific link
+    
+    output) cleaned type_of_listing, mls number of listing, listing status  
+    '''
+    if len(os_search_links) == 1:
+        x = (str(os_search_links).replace('[', '').replace("'", "").replace(']', ''))
         r = basically_a_con(str(x))
-        if r is not None:
+        if r is not None:  # if response
             html = BeautifulSoup(r, hdotp)
             t_o_l = set()  # type_of_listing
             for ul in html.select(tol):  # type_listing
                 for info in ul.text.split('\n'):
                     if len(info) > 0:
                         t_o_l.add(info.strip())
-            ct = ''.join(t_o_l)  # clean_type
+            clean_type_of_listing = ''.join(t_o_l)  # clean_type
             mlsnum = set()  # mls_number_of_listing
             for ul in html.select(lmilsst):  # mls of listing
                 for info in ul.text.split('\n'):
                     if len(info) > 0:
                         mlsnum.add(info.strip())
-            cmls = ''.join(mlsnum)  # clean_mls
+            mls_number_of_listing = ''.join(mlsnum)  # clean_mls
             sol = set()
             for ul in html.select(stts):  # status of listing
                 for info in ul.text.split('\n'):  # 
                     if len(info) > 0:
                         sol.add(info.strip())
-            chk = ''.join(sol)  # check_status
-            return [ct, cmls, chk]
-        raise Exception(f're_inform_re_evaluate {url} response == {r}') # failed get
-    elif len(url) > 1:
-        raise Exception(f'More than one new listing {url}')
+            check_listing_status = ''.join(sol)  # check_status
+            return [clean_type_of_listing, mls_number_of_listing, check_listing_status]
+        raise Exception(f're_inform_re_evaluate {os_search_links} response == {r}') # failed get
+    elif len(os_search_links) > 1:  # if multiple unseen new listings 
+        raise Exception(f'More than one new listing {os_search_links}')
 
 
-def gen_link_of_interest(psl):  # builds link for listing of interest
-    lsl = on_site_search_links(psl)
+def gen_link_of_interest(psl, csl):  # builds link for listing of interest
+    lsl = on_site_search_link(psl, csl)
     bd = rere(lsl)
     mls = (bd.pop(1)).replace('MLS #', '/ebr/')
     if len(lsl) > 0:
@@ -135,13 +181,13 @@ def gen_link_of_interest(psl):  # builds link for listing of interest
                     link_dct.append(targ_url)
                     w += 1
                 else:
-                    raise Exception(f'Listing Status = {rere(on_site_search_links(psl).pop())}')
+                    raise Exception(f'Listing Status = {rere(lsl.pop())}')
             return link_dct  # *
         else:
             if bd.pop() == 'Active':
                 return (base_url + mls).lower()  # current = shortest, length seems to + p(e)
             else:
-                raise Exception(f'Listing Status = {rere(on_site_search_links(psl).pop())}')
+                raise Exception(f'Listing Status = {rere(lsl.pop())}')
 
     raise Exception(f'len(listing_search_link {len(lsl)} < 0')   # **
     # ** if don't return before this and logical next, will return when not meant to
@@ -149,6 +195,12 @@ def gen_link_of_interest(psl):  # builds link for listing of interest
 
 
 def formated_h4s(location, data):
+    '''
+    input)location 
+        city (maybe state) {location} of home for sale
+    input) data 
+        scraped (or otherwise) data on home for sale
+    '''
     header = 'New/Listing/in', '/', location, '!'
     footer = 'More info: '
     x = '\n > '.join(data)  # pleasanton(pleasanton_log) '\n- ' 
@@ -171,8 +223,16 @@ def formated_h4s(location, data):
     return q
 
 
-def clean_listing_data(psl, location):  # done here to hedge for readability of pull_listing_data
-    x = bbsp(gen_link_of_interest(psl))
+def clean_listing_data(psl, csl, location):  # done here to hedge for readability of pull_listing_data
+    '''
+    input) psl
+        previously seen listings for corresponding location
+    input) csl
+        short (or otherwise) link to new listings for corresponding location 
+    input) location 
+        corresponding location for new listings of potential interest
+    '''
+    x = bbsp(gen_link_of_interest(psl, csl))
     # listing_images([1, 2])
     price = ''.join((list(x)).pop())
     beds = ''.join((list(x)).pop(0)).replace('Beds', ' Beds')
@@ -249,130 +309,3 @@ def get_beds_baths_sqft_price(response):
 def bbsp(listing_url):
     return get_beds_baths_sqft_price(basically_a_con(listing_url))
 
-
-# WHERE WE STARTED (Jan 2019)
-"""
-import time
-from requests import get
-from bs4 import BeautifulSoup
-from contextlib import closing
-from requests.exceptions import RequestException
-
-now = time.time()
-
-
-def is_good_response(resp):
-    # Returns True if the response seems to be HTML, False otherwise.
-    content_type = resp.headers['Content-Type'].lower()
-    return (resp.status_code == 200
-            and content_type is not None
-            and content_type.find('html') > -1)
-
-
-def log_error(e):  # need to make this post to permanent log
-    # prints errors, log pending
-    print(e)
-
-
-def simple_get(url):
-    # Attempts to get the content at `url` by making an HTTP GET request.
-    # If the content-type of response is some kind of HTML/XML, return the text content, otherwise return None.
-    try:
-        with closing(get(url, stream=True)) as resp:
-            if is_good_response(resp):
-                return resp.content
-            else:
-                return None
-    except RequestException as e:
-        log_error('Error during requests to {0} : {1}'.format(url, str(e)))
-        return None
-
-
-def pull_the_new_pleasanton_listings(base_url):
-    response = simple_get(base_url)
-    if response is not None:
-        html = BeautifulSoup(response, 'html.parser')
-        many_datas = set()
-        for ul in html.select('div.mdl-card__supporting-text h2.mdl-card__title-text'):  # 12/12 addresses
-            for info in ul.text.split('n'):
-                if len(info) > 0:
-                    many_datas.add(info.strip())
-        pulled_listings = list(many_datas)
-        return pulled_listings
-    # Raise an exception if we failed to get any data from the url
-    raise Exception('Error retrieving new_listings_on_base_page_to_scrape at {}'.format(base_url))
-
-
-def test_000(existing_results):
-    results = []
-    in_existing_results_count: int = 0
-    the_pull = pull_the_new_pleasanton_listings('https://goo.gl/WJmmut')
-    for listing in the_pull:
-        if listing not in results:
-            if listing not in existing_results:
-                results.append(listing)
-            elif listing in existing_results:
-                in_existing_results_count += 1
-        elif listing in results:
-            print('existing in results (possible double listing?)')
-        else:
-            print('we got to else.. f.')
-    if len(results) >= 1:
-        print('preexisting listings:', in_existing_results_count)
-        return results
-    elif len(results) == 0:
-        print('preexisting listings:', in_existing_results_count)
-        return 'no new results'
-    else:
-        print('len(results): != 0 , < 1')
-        return 'we got to else.. f.'
-
-
-'''from here we say
-if results are none; end.
-else;
-go find the new listing (formatted url ?perhaps?)
-pull the listing info
-put it into formatted facebook post
-login and post (post asap to test rand times)
-&& have this auto-run every:
-    15 min during peak times
-    75 min during trough times
-        15 min during all times at first
-            store results seperately
-            update email/brief every hour'''
-# results log
-# listings log
-# logs in general ?separate file? ? imported?
-
-# current 'listings log'
-from_test_000 = ['4326 CAMPINIA PL, PLEASANTON, CA 94566', '6248 ROSLIN CT, PLEASANTON, CA 94588',
-'3537 GULFSTREAM ST, PLEASANTON, CA 94588', '3053 FERNDALE COURT, PLEASANTON, CA 94588',
-'7826 LA QUINTA CT, PLEASANTON, CA 94588', '3834 PINOT CT, PLEASANTON, CA 94566',
-'2345 E RUBY HILL DR, PLEASANTON, CA 94566', '2113 ARROYO CT #1, PLEASANTON, CA 94588',
-'6913 CORTE MATEO, PLEASANTON, CA 94566', '3902 MOUNT MCKINLEY COURT, PLEASANTON, CA 94588',
-'29 COLBY CT, PLEASANTON, CA 94566']
-
-print(test_000(from_test_000))
-then = time.time()
-print('execution:', then - now, 'seconds')
-"""
-
-
-# def get_info(url):
-#     response = simple_get(url)
-#     if response is not None:
-#         html = BeautifulSoup(response, 'html.parser')
-#         somed = set()
-#         for ul in html.select('ul.family li'):
-#             for info in ul.text.split('\n'):
-#                 if len(info) > 0:
-#                     somed.add(info.strip())
-#         if len(somed) < 1:
-#             raise Exception('ERROR : NO DATA ; get_info{}'.format(url))
-#         else:
-#             return list(somed)
-#     raise Exception('Error retrieving INFO at {}'.format(url))  # Raise an exception if failed to get response
-
-
-# print(get_info('https://winstonrobson.bhhsdrysdale.com/single-family/mls/81736758/3973-w-las-positas-blvd-pleasanton-ca-94588'))
