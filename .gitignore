@@ -90,11 +90,11 @@ celerybeat-schedule
 # SageMath parsed files
 *.sage.py
 
-# vscode
-.vscode
-
 # old code
 old-code.py
+/old-code.py
+old-code
+/old-code
 
 # Environments
 .env
