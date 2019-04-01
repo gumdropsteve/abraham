@@ -8,12 +8,15 @@ from _pile import pleasantonhomesforsale_hash, psl_pleasanton, npsl
 # w = q  # 'https://winstonrobson.bhhsdrysdale.com/ebr/ml81738898'
 # print(bbsp(w))
 
-
+pleasanton_new = 'https://www.bhhsdrysdale.com/homes/for-sale/status-active/city-Pleasanton/dsort-n'
 def pleasanton(locaion='Pleasanton'):  # test_005 : plugin : head scrape @ facebook updater, assist scrape @ Abraham
-    return clean_listing_data(psl_pleasanton, locaion)  # NEED TO WORK ON DOUBLE PULL
+    return clean_listing_data(psl_pleasanton, pleasanton_new,locaion)  # NEED TO WORK ON DOUBLE PULL
 
 
 def look_and_see(q, hashtags):
+    '''
+    oof
+    '''
     from new_listing_scrape import comps
     p = comps(psl_pleasanton, npsl)
     if p:
@@ -46,7 +49,7 @@ def pleasantonhome(hashtags):
     from the_facebook_part import get_on_facebook, post_to_page, shorten_, moves, post_now, get_on_google
     get_on_facebook()
     get_on_google()
-    shorten_(gen_link_of_interest(psl_pleasanton))
+    shorten_(gen_link_of_interest(psl_pleasanton, pleasanton_new))
     x = pleasanton(locaion='Pleasanton')
     lower_tags = '\n \n -- \n' + hashtags
     post_to_page(page=ph4s_fb, location='pleasanton, california', feeling='look', feeling2='home re', status=x, hashtags=lower_tags, paste_link='yes')  # status=formated_h4s('Pleasanton', pleasanton())

@@ -28,7 +28,7 @@ def basically_a_con(dom, *stream):  # Attempts to get the content at `url` (dom)
                 if good_respons(e):  # If the content-type of response is some kind of HTML/XML
                     return e.content  # return the text content
     except RequestException as e:  # otherwise return None
-        raise Exception(f'Error during requests to {dom} : {str(e)}')
+        raise Exception(f'Error during requests to {dom} : {e}')
 
 
 def pull_the_new_pleasanton_listings(base_url):

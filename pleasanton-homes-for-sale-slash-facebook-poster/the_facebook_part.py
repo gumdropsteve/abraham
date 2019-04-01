@@ -186,4 +186,9 @@ def post_to_page(page, location, feeling, feeling2, status, hashtags, paste_link
     add_hash(hashtags)  # hashtags
     check_in(location)
     feeling_or_activity(feeling, feeling2)
-    
+
+
+'''test'''
+# from _pile import ph4s_fb
+# post_to_page(page=ph4s_fb, location='pleasanton, california', feeling='look', feeling2='home re', status='', hashtags='', paste_link='yes')  # status=formated_h4s('Pleasanton', pleasanton())
+
