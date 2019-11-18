@@ -163,10 +163,45 @@ def rere(os_search_links):  # all around utility of sorts
             return [clean_type_of_listing, mls_number_of_listing, check_listing_status]
         raise Exception(f're_inform_re_evaluate {os_search_links} response == {r}') # failed get
     elif len(os_search_links) > 1:  # if multiple unseen new listings 
-        raise Exception(f'More than one new listing {os_search_links}')
+        # raise Exception(f'More than one new listing {os_search_links}')
+        multiple_new_listings = []
+        for link in os_search_links:
+            x = (str(link).replace('[', '').replace("'", "").replace(']', ''))
+            r = basically_a_con(str(x))
+            if r is not None:  # if response
+                html = BeautifulSoup(r, hdotp)
+                t_o_l = set()  # type_of_listing
+                for ul in html.select(tol):  # type_listing
+                    for info in ul.text.split('\n'):
+                        if len(info) > 0:
+                            t_o_l.add(info.strip())
+                clean_type_of_listing = ''.join(t_o_l)  # clean_type
+                mlsnum = set()  # mls_number_of_listing
+                for ul in html.select(lmilsst):  # mls of listing
+                    for info in ul.text.split('\n'):
+                        if len(info) > 0:
+                            mlsnum.add(info.strip())
+                mls_number_of_listing = ''.join(mlsnum)  # clean_mls
+                sol = set()
+                for ul in html.select(stts):  # status of listing
+                    for info in ul.text.split('\n'):  # 
+                        if len(info) > 0:
+                            sol.add(info.strip())
+                check_listing_status = ''.join(sol)  # check_status
+                multiple_new_listings.append([clean_type_of_listing, mls_number_of_listing, check_listing_status])
+            raise Exception(f're_inform_re_evaluate {link} response == {r}') # failed get
+        # testing processing multiple new listings 
+        return multiple_new_listings
+    else:
+        raise Exception(f'\nlen(os_search_links) = {len(os_search_links)}\n')
 
 
+# POI FOR MULTIPLE NEW LISTING PROCESSING
 def gen_link_of_interest(psl, csl):  # builds link for listing of interest
+    """
+    PROCESSING MULTIPLE LISTINGS NOT YET ADDRESSED 
+    FUNCTION NEEDS TO BE BETTER UNDERSTOOD 
+    """
     lsl = on_site_search_link(psl, csl)
     bd = rere(lsl)
     mls = (bd.pop(1)).replace('MLS #', '/ebr/')
@@ -228,11 +263,12 @@ def clean_listing_data(psl, csl, location):  # done here to hedge for readabilit
     input) psl
         previously seen listings for corresponding location
     input) csl
+            > "city short link"
         short (or otherwise) link to new listings for corresponding location 
     input) location 
         corresponding location for new listings of potential interest
     '''
-    x = bbsp(gen_link_of_interest(psl, csl))
+    x = bbsp(gen_link_of_interest(psl, csl)) # POI FOR MULTIPLE NEW LISTING PROCESSING
     # listing_images([1, 2])
     price = ''.join((list(x)).pop())
     beds = ''.join((list(x)).pop(0)).replace('Beds', ' Beds')
