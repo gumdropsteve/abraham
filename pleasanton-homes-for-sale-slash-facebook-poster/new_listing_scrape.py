@@ -85,30 +85,32 @@ def comps(existing_results, city_short_link):
         raise Exception('F')
 
 
-def on_site_search_link(seen_listings, city_short_link):  # links as if searched the exact address on site
+def on_site_search_link(seen_listings, city_short_link):
     '''
-    area for improvement) processing multiple new listings
-
-    input) previously seen listing log {seen_listings}
-    input) city_short_link for comps()
-    
     1) runs comps() on seen_listings for city of interest (news = results)
     2) takes the full address of any newly seen listing
     3) converts it to url one would land on as result of searching that full address (on site)
 
-    output) url(s) of on site searches of the exact addresses seen in news
+    inputs: 
+    > seen_listings (csv)
+        >> previously seen listing log
+    > city_short_link (str)
+        >> link for comps()
+
+    output: 
+    > urls (list)
+        >> url(s) of on site searches of the exact addresses seen in news
     '''
-    some_data = []  # for later processing of multiple new listings 
-
+    # set output list
+    urls = []  
+    # list of strings
     news = comps(seen_listings, city_short_link)
-    _ = len(news)
-
-    if _ == 1:
-        for prop_of_interest in news:  # for unseen new listing  # meant to expand later for processing multiple new listings 
-            some_data.append(bsearch_url + prop_of_interest.lower().replace(' ', ';'))  # adds address after conversion to resemble end of search url
-        return some_data  # list of end pieces for on site search links
-    else:
-        raise Exception(f'MULTIPLE NEW LISTINGS: \n {_} new listings. {news}')
+    # go through each property
+    for property in news:
+        # write the link that would result from searching it and add to output list
+        urls.append(bsearch_url + property.lower().replace(' ', ';'))
+    # list of strings (urls)
+    return urls
 
 
 def rere(os_search_links):  # all around utility of sorts
@@ -204,6 +206,7 @@ def gen_link_of_interest(psl, csl):  # builds link for listing of interest
     """
     lsl = on_site_search_link(psl, csl)
     bd = rere(lsl)
+    return bd
     mls = (bd.pop(1)).replace('MLS #', '/ebr/')
     if len(lsl) > 0:
         if len(lsl) > 1:
