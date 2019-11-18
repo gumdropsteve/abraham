@@ -281,14 +281,21 @@ def clean_listing_data(psl, csl, location):  # done here to hedge for readabilit
     input) location 
         corresponding location for new listings of potential interest
     '''
-    x = bbsp(gen_link_of_interest(psl, csl)) # POI FOR MULTIPLE NEW LISTING PROCESSING
-    # listing_images([1, 2])
-    price = ''.join((list(x)).pop())
-    beds = ''.join((list(x)).pop(0)).replace('Beds', ' Beds')
-    baths = ''.join((list(x)).pop(1)).replace('Baths', ' Baths')
-    sqft = ''.join((list(x)).pop(2)).replace('Sqft', ' SqFt')
-    big_4 = beds, baths, sqft, price  # ('4 Beds', '2 Baths', '1,965 SqFt', '$1,025,500')
-    return formated_h4s(location, big_4)
+    # define output list
+    clean_listings = []
+    # generate links of interest for new listings 
+    new_listings = gen_link_of_interest(psl, csl)
+    # go through links 
+    for listing in new_listings:
+        x = bbsp(listing) # POI FOR MULTIPLE NEW LISTING PROCESSING
+        # listing_images([1, 2])
+        price = ''.join((list(x)).pop())
+        beds = ''.join((list(x)).pop(0)).replace('Beds', ' Beds')
+        baths = ''.join((list(x)).pop(1)).replace('Baths', ' Baths')
+        sqft = ''.join((list(x)).pop(2)).replace('Sqft', ' SqFt')
+        big_4 = beds, baths, sqft, price  # ('4 Beds', '2 Baths', '1,965 SqFt', '$1,025,500')
+        clean_listings.append(formated_h4s(location, big_4))
+    return clean_listings
 
 
 def price(response):
@@ -300,7 +307,8 @@ def price(response):
                 if len(info) > 0: 
                     somed.add(info.strip(prc))
         if len(somed) < 1:
-            return 'ERROR : NO DATA --get_price{}'.format(response)
+            # return 'ERROR : NO DATA --get_price{}'.format(response)
+            return ''
         else:
             return list(somed)
     raise Exception('Error retrieving PRICE at {}'.format(response))  # Raise an exception if failed to get response
@@ -315,7 +323,8 @@ def sqft(response):
                 if len(info) > 0:
                     somed.add(info.strip())
         if len(somed) < 1:
-            raise Exception(f'ERROR : NO DATA --get_sqft{response}')
+            # raise Exception(f'ERROR : NO DATA --get_sqft{response}')
+            return ''
         else:
             return list(somed)
     raise Exception(f'Error retrieving SQFT at {response}')  # Raise an exception if failed to get response
@@ -330,7 +339,8 @@ def beds(response):
                 if len(info) > 0:
                     somed.add(info.strip())
         if len(somed) < 1:
-            raise Exception(f'ERROR : NO DATA --get_beds{response}')
+            # raise Exception(f'ERROR : NO DATA --get_beds{response}')
+            return ''
         else:
             return list(somed)
     raise Exception(f'Error retrieving BEDS at {response}')  # Raise an exception if failed to get response
@@ -345,7 +355,8 @@ def baths(response):
                 if len(info) > 0:
                     somed.add(info.strip())
         if len(somed) < 1:
-            raise Exception(f'ERROR : NO DATA ; get_baths{response}')
+            # raise Exception(f'ERROR : NO DATA ; get_baths{response}')
+            return ''
         else:
             return list(somed)
     raise Exception(f'Error retrieving BATHS at {response}')  # Raise an exception if failed to get response
