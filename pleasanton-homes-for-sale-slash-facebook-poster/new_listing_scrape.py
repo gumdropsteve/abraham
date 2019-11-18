@@ -168,8 +168,9 @@ def rere(os_search_links):  # all around utility of sorts
         # raise Exception(f'More than one new listing {os_search_links}')
         multiple_new_listings = []
         for link in os_search_links:
-            x = (str(link).replace('[', '').replace("'", "").replace(']', ''))
-            r = basically_a_con(str(x))
+            # x = (str(link).replace('[', '').replace("'", "").replace(']', ''))
+            # x = (str(os_search_links).replace("'", ""))
+            r = basically_a_con(link)
             if r is not None:  # if response
                 html = BeautifulSoup(r, hdotp)
                 t_o_l = set()  # type_of_listing
@@ -191,7 +192,8 @@ def rere(os_search_links):  # all around utility of sorts
                             sol.add(info.strip())
                 check_listing_status = ''.join(sol)  # check_status
                 multiple_new_listings.append([clean_type_of_listing, mls_number_of_listing, check_listing_status])
-            raise Exception(f're_inform_re_evaluate {link} response == {r}') # failed get
+            else:
+                raise Exception(f're_inform_re_evaluate {link} response == {r}') # failed get
         # testing processing multiple new listings 
         return multiple_new_listings
     else:
