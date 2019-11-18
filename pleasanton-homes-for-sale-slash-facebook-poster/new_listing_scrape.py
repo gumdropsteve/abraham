@@ -85,30 +85,32 @@ def comps(existing_results, city_short_link):
         raise Exception('F')
 
 
-def on_site_search_link(seen_listings, city_short_link):  # links as if searched the exact address on site
+def on_site_search_link(seen_listings, city_short_link):
     '''
-    area for improvement) processing multiple new listings
-
-    input) previously seen listing log {seen_listings}
-    input) city_short_link for comps()
-    
     1) runs comps() on seen_listings for city of interest (news = results)
     2) takes the full address of any newly seen listing
     3) converts it to url one would land on as result of searching that full address (on site)
 
-    output) url(s) of on site searches of the exact addresses seen in news
+    inputs: 
+    > seen_listings (csv)
+        >> previously seen listing log
+    > city_short_link (str)
+        >> link for comps()
+
+    output: 
+    > urls (list)
+        >> url(s) of on site searches of the exact addresses seen in news
     '''
-    some_data = []  # for later processing of multiple new listings 
-
+    # set output list
+    urls = []  
+    # list of strings
     news = comps(seen_listings, city_short_link)
-    _ = len(news)
-
-    if _ == 1:
-        for prop_of_interest in news:  # for unseen new listing  # meant to expand later for processing multiple new listings 
-            some_data.append(bsearch_url + prop_of_interest.lower().replace(' ', ';'))  # adds address after conversion to resemble end of search url
-        return some_data  # list of end pieces for on site search links
-    else:
-        raise Exception(f'MULTIPLE NEW LISTINGS: \n {_} new listings. {news}')
+    # go through each property
+    for property in news:
+        # write the link that would result from searching it and add to output list
+        urls.append(bsearch_url + property.lower().replace(' ', ';'))
+    # list of strings (urls)
+    return urls
 
 
 def rere(os_search_links):  # all around utility of sorts
@@ -166,8 +168,9 @@ def rere(os_search_links):  # all around utility of sorts
         # raise Exception(f'More than one new listing {os_search_links}')
         multiple_new_listings = []
         for link in os_search_links:
-            x = (str(link).replace('[', '').replace("'", "").replace(']', ''))
-            r = basically_a_con(str(x))
+            # x = (str(link).replace('[', '').replace("'", "").replace(']', ''))
+            # x = (str(os_search_links).replace("'", ""))
+            r = basically_a_con(link)
             if r is not None:  # if response
                 html = BeautifulSoup(r, hdotp)
                 t_o_l = set()  # type_of_listing
@@ -189,10 +192,13 @@ def rere(os_search_links):  # all around utility of sorts
                             sol.add(info.strip())
                 check_listing_status = ''.join(sol)  # check_status
                 multiple_new_listings.append([clean_type_of_listing, mls_number_of_listing, check_listing_status])
-            raise Exception(f're_inform_re_evaluate {link} response == {r}') # failed get
+            else:
+                # failed get
+                raise Exception(f're_inform_re_evaluate {link} response == {r}') 
         # testing processing multiple new listings 
         return multiple_new_listings
     else:
+        # len(os_search_links) <= 0 
         raise Exception(f'\nlen(os_search_links) = {len(os_search_links)}\n')
 
 
@@ -204,29 +210,36 @@ def gen_link_of_interest(psl, csl):  # builds link for listing of interest
     """
     lsl = on_site_search_link(psl, csl)
     bd = rere(lsl)
-    mls = (bd.pop(1)).replace('MLS #', '/ebr/')
-    if len(lsl) > 0:
-        if len(lsl) > 1:
-            w = 0
-            link_dct = []
-            while w in range(0, len(lsl)):
-                if bd.pop() == 'Active':  # don't want to be posting anything but Active 
-                    targ_url = (base_url + mls).lower()  # current = shortest, length seems to + p(e)
-                    # url w/o .bhhsdrysdale result = endless site loading screen
-                    link_dct.append(targ_url)
-                    w += 1
-                else:
-                    raise Exception(f'Listing Status = {rere(lsl.pop())}')
-            return link_dct  # *
+    # define output list
+    output = []
+    # count through onsite search links 
+    for i in range(len(lsl)):
+        # pull this bd 
+        t_bd = bd[i].pop(1)
+        # replace mls # with url equivelent 
+        mls = (t_bd).replace('MLS #', '/ebr/')
+        # if len(lsl) > 0:
+            # if len(lsl) > 1:
+                # w = 0
+        # link_dct = []
+                # while w in range(0, len(lsl[])):
+        status = bd[i].pop(1)
+        if status == 'Active':  # don't want to be posting anything but Active 
+            targ_url = (base_url + mls).lower()  # current = shortest, length seems to + p(e)
+            # url w/o .bhhsdrysdale result = endless site loading screen
+            output.append(targ_url)
+                    # w += 1
+                    # else:
+                        # raise Exception(f'Listing Status = {rere(lsl.pop())}')
         else:
-            if bd.pop() == 'Active':
-                return (base_url + mls).lower()  # current = shortest, length seems to + p(e)
-            else:
-                raise Exception(f'Listing Status = {rere(lsl.pop())}')
-
-    raise Exception(f'len(listing_search_link {len(lsl)} < 0')   # **
+            print(f't_bd == {t_bd}')
+            print(f'status == {status}')
+            print(f'bd[i] == {bd[i]}\n')
+        # output.append(link_dct)  # *
+        # raise Exception(f'len(listing_search_link {len(lsl)} < 0')   # **
     # ** if don't return before this and logical next, will return when not meant to
     # * aka putting print() instead of return here
+    return output 
 
 
 def formated_h4s(location, data):
@@ -268,14 +281,21 @@ def clean_listing_data(psl, csl, location):  # done here to hedge for readabilit
     input) location 
         corresponding location for new listings of potential interest
     '''
-    x = bbsp(gen_link_of_interest(psl, csl)) # POI FOR MULTIPLE NEW LISTING PROCESSING
-    # listing_images([1, 2])
-    price = ''.join((list(x)).pop())
-    beds = ''.join((list(x)).pop(0)).replace('Beds', ' Beds')
-    baths = ''.join((list(x)).pop(1)).replace('Baths', ' Baths')
-    sqft = ''.join((list(x)).pop(2)).replace('Sqft', ' SqFt')
-    big_4 = beds, baths, sqft, price  # ('4 Beds', '2 Baths', '1,965 SqFt', '$1,025,500')
-    return formated_h4s(location, big_4)
+    # define output list
+    clean_listings = []
+    # generate links of interest for new listings 
+    new_listings = gen_link_of_interest(psl, csl)
+    # go through links 
+    for listing in new_listings:
+        x = bbsp(listing) # POI FOR MULTIPLE NEW LISTING PROCESSING
+        # listing_images([1, 2])
+        price = ''.join((list(x)).pop())
+        beds = ''.join((list(x)).pop(0)).replace('Beds', ' Beds')
+        baths = ''.join((list(x)).pop(1)).replace('Baths', ' Baths')
+        sqft = ''.join((list(x)).pop(2)).replace('Sqft', ' SqFt')
+        big_4 = beds, baths, sqft, price  # ('4 Beds', '2 Baths', '1,965 SqFt', '$1,025,500')
+        clean_listings.append(formated_h4s(location, big_4))
+    return clean_listings
 
 
 def price(response):
@@ -287,7 +307,8 @@ def price(response):
                 if len(info) > 0: 
                     somed.add(info.strip(prc))
         if len(somed) < 1:
-            return 'ERROR : NO DATA --get_price{}'.format(response)
+            # return 'ERROR : NO DATA --get_price{}'.format(response)
+            return ''
         else:
             return list(somed)
     raise Exception('Error retrieving PRICE at {}'.format(response))  # Raise an exception if failed to get response
@@ -302,7 +323,8 @@ def sqft(response):
                 if len(info) > 0:
                     somed.add(info.strip())
         if len(somed) < 1:
-            raise Exception(f'ERROR : NO DATA --get_sqft{response}')
+            # raise Exception(f'ERROR : NO DATA --get_sqft{response}')
+            return ''
         else:
             return list(somed)
     raise Exception(f'Error retrieving SQFT at {response}')  # Raise an exception if failed to get response
@@ -317,7 +339,8 @@ def beds(response):
                 if len(info) > 0:
                     somed.add(info.strip())
         if len(somed) < 1:
-            raise Exception(f'ERROR : NO DATA --get_beds{response}')
+            # raise Exception(f'ERROR : NO DATA --get_beds{response}')
+            return ''
         else:
             return list(somed)
     raise Exception(f'Error retrieving BEDS at {response}')  # Raise an exception if failed to get response
@@ -332,7 +355,8 @@ def baths(response):
                 if len(info) > 0:
                     somed.add(info.strip())
         if len(somed) < 1:
-            raise Exception(f'ERROR : NO DATA ; get_baths{response}')
+            # raise Exception(f'ERROR : NO DATA ; get_baths{response}')
+            return ''
         else:
             return list(somed)
     raise Exception(f'Error retrieving BATHS at {response}')  # Raise an exception if failed to get response
