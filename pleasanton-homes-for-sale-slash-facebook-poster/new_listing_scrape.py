@@ -193,10 +193,12 @@ def rere(os_search_links):  # all around utility of sorts
                 check_listing_status = ''.join(sol)  # check_status
                 multiple_new_listings.append([clean_type_of_listing, mls_number_of_listing, check_listing_status])
             else:
-                raise Exception(f're_inform_re_evaluate {link} response == {r}') # failed get
+                # failed get
+                raise Exception(f're_inform_re_evaluate {link} response == {r}') 
         # testing processing multiple new listings 
         return multiple_new_listings
     else:
+        # len(os_search_links) <= 0 
         raise Exception(f'\nlen(os_search_links) = {len(os_search_links)}\n')
 
 
@@ -208,30 +210,36 @@ def gen_link_of_interest(psl, csl):  # builds link for listing of interest
     """
     lsl = on_site_search_link(psl, csl)
     bd = rere(lsl)
-    return bd
-    mls = (bd.pop(1)).replace('MLS #', '/ebr/')
-    if len(lsl) > 0:
-        if len(lsl) > 1:
-            w = 0
-            link_dct = []
-            while w in range(0, len(lsl)):
-                if bd.pop() == 'Active':  # don't want to be posting anything but Active 
-                    targ_url = (base_url + mls).lower()  # current = shortest, length seems to + p(e)
-                    # url w/o .bhhsdrysdale result = endless site loading screen
-                    link_dct.append(targ_url)
-                    w += 1
-                else:
-                    raise Exception(f'Listing Status = {rere(lsl.pop())}')
-            return link_dct  # *
+    # define output list
+    output = []
+    # count through onsite search links 
+    for i in range(len(lsl)):
+        # pull this bd 
+        t_bd = bd[i].pop(1)
+        # replace mls # with url equivelent 
+        mls = (t_bd).replace('MLS #', '/ebr/')
+        # if len(lsl) > 0:
+            # if len(lsl) > 1:
+                # w = 0
+        # link_dct = []
+                # while w in range(0, len(lsl[])):
+        status = bd[i].pop(1)
+        if status == 'Active':  # don't want to be posting anything but Active 
+            targ_url = (base_url + mls).lower()  # current = shortest, length seems to + p(e)
+            # url w/o .bhhsdrysdale result = endless site loading screen
+            output.append(targ_url)
+                    # w += 1
+                    # else:
+                        # raise Exception(f'Listing Status = {rere(lsl.pop())}')
         else:
-            if bd.pop() == 'Active':
-                return (base_url + mls).lower()  # current = shortest, length seems to + p(e)
-            else:
-                raise Exception(f'Listing Status = {rere(lsl.pop())}')
-
-    raise Exception(f'len(listing_search_link {len(lsl)} < 0')   # **
+            print(f't_bd == {t_bd}')
+            print(f'status == {status}')
+            print(f'bd[i] == {bd[i]}\n')
+        # output.append(link_dct)  # *
+        # raise Exception(f'len(listing_search_link {len(lsl)} < 0')   # **
     # ** if don't return before this and logical next, will return when not meant to
     # * aka putting print() instead of return here
+    return output 
 
 
 def formated_h4s(location, data):
